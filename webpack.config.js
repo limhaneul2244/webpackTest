@@ -4,11 +4,12 @@ const childProcess = require('child_process');
 require('dotenv').config();
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const { CleanWebpackPlugin } = require('clean-webpack-plugin');
+const ImageMinimizerPlugin = require('image-minimizer-webpack-plugin');
+
 
 // 모듈을 밖으로 빼내는 노드 JS문법 엔트리, 아웃풋 그리고 번들링 모드설정 가능
 module.exports = {
-  mode: 'development',
-  // mode: 'production',
+  mode: process.env.NODE_ENV === 'development' ? 'development' : 'production',
 
   entry: {
     main: path.resolve('./src/app.js')
@@ -66,6 +67,22 @@ module.exports = {
       template: './index.html',
     }),
     new CleanWebpackPlugin()
-  ]
+  ],
 
+  optimization: {
+    minimize: true,
+    minimizer: [
+      new ImageMinimizerPlugin({
+        test: /\.(jpe?g|png|gif|svg)/i,
+        minimizer: {
+          implementation: ImageMinimizerPlugin.imageminMinify,
+          options: {
+            plugins: [
+              ["imagemin-optipng", { optimizationLevel: 3 }]
+            ]
+          }
+        }
+      })
+    ],
+  }
 }
